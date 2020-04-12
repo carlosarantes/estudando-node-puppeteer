@@ -5,22 +5,24 @@ var bodyParser = require('body-parser');
 
 let page = null;
 (async () => {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     return await browser.newPage();
 })().then( (p) => {
     page = p;
+}).catch( (err) => {
+    page = null;
 });
 
 var ex = express();
-ex.use(bodyParser.json()); // for parsing application/json
+ex.use(bodyParser.json());
 ex.use(bodyParser.urlencoded({ extended: true })); 
 
 ex.get("/getQRCode",  async (req, res) => {
-    await page.goto("https://web.whatsapp.com/", { waitUntil: 'networkidle2' });
 
-    await page.waitForSelector('._11ozL');
+    await page.goto("https://web.whatsapp.com/", { waitUntil: 'networkidle2' });
+     await page.waitForSelector('.landing-main');
     const qrCode = page.evaluate( () => {
-        const divQrCode = document.getElementsByClassName("_11ozL")[0];
+        const divQrCode = document.getElementsByClassName("landing-main")[0];
         console.log(divQrCode);
         return divQrCode;
     });
@@ -56,3 +58,5 @@ ex.post("/sendMessage", async (req, res) => {
 
 ex.listen(3400);
 // await browser.close()
+
+// wss://web.whatsapp.com/ws
